@@ -3,7 +3,6 @@ import yfinance as yf
 import pandas as pd
 import plotly.graph_objs as go
 
-# Mapping of company names to tickers
 tickers = {
     "Apple (AAPL)": "AAPL",
     "Microsoft (MSFT)": "MSFT",
@@ -12,20 +11,17 @@ tickers = {
     "Alphabet (GOOGL)": "GOOGL"
 }
 
-# Sidebar: company selection
 st.sidebar.title("S&P 500 Tech Titans Pulse")
 selected_company = st.sidebar.selectbox("Select a Company", list(tickers.keys()))
 ticker_symbol = tickers[selected_company]
 
-# Title
+
 st.title(f"{selected_company} – Real-Time Financial Dashboard")
 
-# Fetch company data
 company = yf.Ticker(ticker_symbol)
 info = company.info
 data = company.history(period="1y")
 
-# KPIs section
 st.subheader("📊 Key Financial Metrics")
 
 col1, col2 = st.columns(2)
@@ -42,28 +38,23 @@ with col2:
     st.metric("Return on Equity", f"{roe:.2%}" if roe else "N/A")
     st.metric("R&D Expense", f"${round(info.get('researchDevelopment', 0)/1e9, 2)} B")
 
-# Line chart: stock price over last year
 st.subheader("📈 Stock Price - Last 1 Year")
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close'))
 fig.update_layout(title=f"{ticker_symbol} Stock Price", xaxis_title="Date", yaxis_title="Price (USD)")
 st.plotly_chart(fig, use_container_width=True)
-# Optional: Calculate custom KPIs if not available
 try:
     revenue = info['totalRevenue']
     r_and_d = info.get('researchDevelopment', 0)
     capex = info.get('capitalExpenditures', 0)
 
-    # R&D as % of Revenue
     r_and_d_pct = (r_and_d / revenue) * 100 if revenue else None
 
-    # CapEx in $B
     capex_b = abs(capex) / 1e9 if capex else None
 
 except Exception as e:
     r_and_d_pct = capex_b = None
 
-# Show Advanced Metrics
 st.subheader("💡 Innovation & Investment KPIs")
 col3, col4 = st.columns(2)
 
